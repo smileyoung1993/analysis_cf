@@ -91,16 +91,15 @@ def crawling_kyochon():
                     bs = BeautifulSoup(html, 'html.parser')
                     tag_table = bs.find('div', attrs={'class': 'shopSchList'})
                     # print(tag_table)
-                    tag_tbody = tag_table.find('li')
+                    tags_li = tag_table.findAll('li')
                     # print('tag_tbody:',tag_tbody)
-                    tags_dl = tag_tbody.findAll('dl')
-                    #print(type(tags_dl), 'tags_dd:', ":", tags_dl)
-                    for tag_dl in tags_dl:
-                        strings = list(tag_dl.strings)
+                    #tags_dl = tag_tbody.findAll('dl')
+                    for tag_li in tags_li:
+                        strings = list(tag_li.strings)
                         print('strings', strings)
-                        name = strings[1]
-                        address = strings[3]
-                        address.strip()
+                        name = strings[3]
+                        address = strings[5]
+                        address = address.strip()
                         sidogu = address.split()[:2]
                         results.append((name, address) + tuple(sidogu))
 
