@@ -5,10 +5,12 @@ import pandas as pd
 import xml.etree.ElementTree as et
 from collection.data_dict import sido_dict,gungu_dict
 import urllib
+from selenium import webdriver
+import time
 
 
 RESULT_DIRECTORY = '__result__/crawling'
-
+#######################페리카나##########################################
 def crawling_pelicana():
     results = []
     for page in count(start=1):
@@ -113,9 +115,58 @@ def crawling_kyochon():
         table['gungu'] = table.gungu.apply(lambda v: gungu_dict.get(v, v))
 
         table.to_csv('{0}/kyonchon_table.csv'.format(RESULT_DIRECTORY), encoding='utf-8', mode='w', index=True)
+##################################굽네치킨#########################################
+# goobne
+def crawling_goobne():
+    results = []
+
+    url = 'https://www.goobne.co.kr/store/search_store.jsp'
+
+    # 첫페이지 로딩
+    wd = webdriver.Chrome('D:\pychamProjects\chromedriver_win32/chromedriver.exe')
+    wd.get(url)
+    time.sleep(5)
+
+    for page in count(start=1):
+        #자바스크립트 실행
+        script = 'store.getList(%d)' % page
+        wd.execute_script(script)
+        time.sleep(5)
+
+        #실행 html (rendering된 html)가져오기
+        html = wd.page_source
+
+        #Parsing with bs4
+        bs =BeautifulSoup(html, 'html.parser')
+        tag_tbody = bs.find('tbody', attrs={'id': 'store_list'})
+        print('tag_table:',type(tag_tbody),tag_tbody)
+        tags_tr = tag_tbody.findAll('tr') # list
+        print('tags_tr:',type(tags_tr),tags_tr)
+
+        # 끝 검출
+    #     if tags_tr[0].get('class') is None: # tags_tr의 첫번째 문자열이 없을때. 탈출
+    #         break
+    #     print(tag_tbody)
+    #     for tag_tr in tags_tr:
+    #         strings = list(tag_tr.strings)
+    #         print('strings:', strings)
+    #         # print('strings[phonenum]:',type(strings[3]))
+    #         name = strings[1]
+    #         phoneNum = strings[3]
+    #         address = strings[6]
+    #         address = address.strip()
+    #         sidogu = address.split()[:2]
+    #         results.append((name,phoneNum,address) + tuple(sidogu)) # 리스트안에 tuple을 사용하는 이유는 리스트는 내용이 변경될 수 있기때문이다.
+    #
+    # table = pd.DataFrame(results, columns=['name','phoneNum', 'address', 'sido', 'gungu']) # dictionary 가 아니기 때문에 column명을 정해준다.
+    # # apply를 통해 lambda함수의 v값이 들어와서 sido를 v로 채움
+    # table['sido'] = table.sido.apply(lambda v: sido_dict.get(v, v)) # 첫번째 파라미터의 값이 v, 뒤에 파라미터는 default값 (서울이 sido_dict에 없으면 서울로 default해라)
+    # table['gungu'] = table.gungu.apply(lambda v: gungu_dict.get(v, v))
+    #
+    # table.to_csv('{0}/goobne_table.csv'.format(RESULT_DIRECTORY), encoding='utf-8', mode='w', index=True)
 
 if __name__ == '__main__':
-    '''
+
     #pelicana
     crawling_pelicana()
 
@@ -125,6 +176,8 @@ if __name__ == '__main__':
     #         % (urllib.parse.quote("전체"), urllib.parse.quote("전체")),
     #     proc=proc_nene,
     #     store=store_nene)
-'''
+
     ## 교촌
-    crawling_kyochon()
+    #crawling_kyochon()
+    ## 굽네
+    #crawling_goobne()
